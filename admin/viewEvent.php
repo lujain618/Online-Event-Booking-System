@@ -1,27 +1,40 @@
 <?php
-// Start session to check if the admin is logged in
-session_start();
+require_once '../includes/config.php';
+require_once '../includes/helpers.php'; 
+checkAdminSession();
 
-// Check if the admin is logged in, if not, redirect to the login page
-if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
-    header("Location: admin.php");
-    exit();
-}
+// Enable error display
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-// Dummy event data - Replace with a real database query based on the event ID
-$events = [
-    1 => ['id' => 1, 'name' => 'Concert', 'date' => '2025-05-10', 'location' => 'Stadium', 'price' => '100', 'image' => 'concert.jpg'],
-    2 => ['id' => 2, 'name' => 'Conference', 'date' => '2025-06-15', 'location' => 'Conference Hall', 'price' => '50', 'image' => 'conference.jpg'],
-    3 => ['id' => 3, 'name' => 'Workshop', 'date' => '2025-07-20', 'location' => 'Community Center', 'price' => '30', 'image' => 'workshop.jpg']
-];
+// Fetch event details
+if (isset($_GET['id'])) {
+    $event_id = $_GET['id'];
 
-// Get the event ID from the URL
-if (isset($_GET['id']) && isset($events[$_GET['id']])) {
-    $event = $events[$_GET['id']];
+    $stmt = $conn->prepare("SELECT * FROM events WHERE id = :id");
+    $stmt->execute([':id' => $event_id]);
+    $event = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Fetch total booked tickets for this event
+    $bookedStmt = $conn->prepare("SELECT SUM(num_tickets) AS total_booked FROM bookings WHERE event_id = :id");
+    $bookedStmt->execute([':id' => $event_id]);
+    $bookedData = $bookedStmt->fetch(PDO::FETCH_ASSOC);
+
+// Calculate available tickets
+    $total_booked = $bookedData['total_booked'] ?? 0;
+    $available_tickets = $event['max_tickets'] - $total_booked;
+    if ($available_tickets < 0) {
+        $available_tickets = 0; // Never show negative tickets
+    }
+
+
+    if (!$event) {
+        echo "<script>alert('Event not found.');</script>";
+        redirect('manageEvents.php');
+    }
 } else {
-    // If no event ID is found, redirect back to manage events page
-    header("Location: manageEvents.php");
-    exit();
+    echo "<script>alert('Invalid event ID.');</script>";
+    redirect('manageEvents.php');
 }
 ?>
 
@@ -29,35 +42,188 @@ if (isset($_GET['id']) && isset($events[$_GET['id']])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Event</title>
-    
+    <title>View Event - Admin Panel</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f7f3;
+            display: flex;
+        }
+
+        /* Side Menu */
+        .side-menu {
+            width: 220px;
+            background-color: #3AA46F;
+            min-height: 100vh;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            position: fixed;
+            color: white;
+        }
+
+        .side-menu h1 {
+            font-size: 22px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .side-menu ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+
+        .side-menu li {
+            margin: 15px 0;
+        }
+
+        .side-menu a {
+            color: white;
+            text-decoration: underline;
+            font-weight: bold;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .side-menu a:hover {
+            color: #d9f2e6;
+        }
+
+        /* Page Content */
+        .content {
+            margin-left: 220px;
+            padding: 30px;
+            width: calc(100% - 220px);
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .event-title {
+            font-size: 32px;
+            color: #2E8659;
+            margin-bottom: 30px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .event-details {
+            margin-bottom: 20px;
+        }
+
+        .event-detail {
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .event-detail strong {
+            width: 150px;
+            display: inline-block;
+            color: #2E8659;
+			white-space: nowrap;
+			margin-right: 10px;
+        }
+
+        .event-image {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .event-image img {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            background-color: #3AA46F;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+
+        .back-link:hover {
+            background-color: #2E8659;
+        }
+
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
 </head>
 <body>
-    <div class="admin-container">
-        <!-- Side Menu -->
-        <div class="side-menu">
-            <h3>Admin Dashboard</h3>
-            <ul>
-                <li><a href="manageEvents.php">Manage Events</a></li>
-                <li><a href="addEvent.php">Add Event</a></li>
-                <li><a href="viewBookings.php">View Bookings</a></li>
-                <li><a href="?logout=true">Logout</a></li>
-            </ul>
+
+<!-- Side Menu -->
+<div class="side-menu">
+    <h1>Admin Panel</h1>
+    <ul>
+        <li><a href="manageEvents.php">Manage Events</a></li>
+        <li><a href="addEvent.php">Add Event</a></li>
+        <li><a href="viewBookings.php">View Bookings</a></li>
+        <li><a href="../auth/logout.php">Logout</a></li>
+    </ul>
+</div>
+
+<!-- Main Content -->
+<div class="content">
+
+    <div class="container">
+        <div class="event-title"><?= htmlspecialchars($event['name']) ?></div>
+
+        <div class="event-details">
+            <div class="event-detail">
+                <strong>Date:</strong> <?= date("F j, Y", strtotime($event['date_time'])) ?>
+            </div>
+
+            <div class="event-detail">
+                <strong>Time:</strong> <?= date("g:i a", strtotime($event['date_time'])) ?>
+            </div>
+
+            <div class="event-detail">
+                <strong>Location:</strong> <?= htmlspecialchars($event['location']) ?>
+            </div>
+
+            <div class="event-detail">
+                <strong>Ticket Price:</strong> <?= htmlspecialchars(number_format($event['price'], 2)) ?> SAR
+            </div>
+
+            <div class="event-detail">
+                <strong>Available Tickets:</strong> <?= htmlspecialchars($available_tickets) ?>
+            </div>
         </div>
 
-        <!-- Main Section -->
-        <div class="main-section">
-            <h2>View Event Details</h2>
-            <div class="event-details">
-                <p><strong>Event Name:</strong> <?php echo $event['name']; ?></p>
-                <p><strong>Event Date:</strong> <?php echo $event['date']; ?></p>
-                <p><strong>Location:</strong> <?php echo $event['location']; ?></p>
-                <p><strong>Ticket Price:</strong> $<?php echo $event['price']; ?></p>
-                <p><strong>Event Image:</strong> <img src="images/<?php echo $event['image']; ?>" alt="Event Image" width="300"></p>
-            </div>
-            <a href="manageEvents.php">Back to Manage Events</a>
+        <div class="event-image">
+            <img src="uploads/<?= htmlspecialchars($event['image']) ?>" alt="Event Image">
+        </div>
+
+        <div style="text-align: center;">
+            <a href="manageEvents.php" class="back-link">Back to Events</a>
         </div>
     </div>
+
+    <footer>
+        &copy; <?= date("Y") ?> Event Booking System | Admin Panel
+    </footer>
+</div>
+
 </body>
 </html>

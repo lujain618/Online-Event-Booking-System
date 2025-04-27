@@ -10,7 +10,6 @@ checkCustomerSession();
 <head>
     <meta charset="UTF-8">
     <title>Home - Event Booking System</title>
-    <link rel="stylesheet" href="../styles/style.css">
     <style>
         body {
             margin: 0;
@@ -163,7 +162,7 @@ checkCustomerSession();
     $stmt = $conn->query("SELECT * FROM events ORDER BY date_time ASC");
     while ($event = $stmt->fetch(PDO::FETCH_ASSOC)) {
         echo '<div class="card">';
-        echo '<img src="uploads/' . htmlspecialchars($event['image']) . '" alt="Event">';
+        echo '<img src="../admin/uploads/' . htmlspecialchars($event['image']) . '" alt="Event">';
         echo '<div class="card-body">';
         echo '<h3>' . htmlspecialchars($event['name']) . '</h3>';
         echo '<p>' . date("F j, Y, g:i a", strtotime($event['date_time'])) . '</p>';

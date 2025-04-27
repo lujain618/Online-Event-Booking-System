@@ -33,7 +33,6 @@ foreach ($cart as $item) {
 <head>
     <meta charset="UTF-8">
     <title>Cart - Event Booking System</title>
-    <link rel="stylesheet" href="../styles/style.css">
     <style>
         body {
             margin: 0;

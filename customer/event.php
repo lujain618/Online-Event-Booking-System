@@ -76,7 +76,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Event Details - Event Booking System</title>
-    <link rel="stylesheet" href="../styles/style.css">
     <style>
         /* Your same style as before here */
         body {
@@ -225,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="top-links">
         <a href="home.php">Home</a>
         <a href="cart.php">Cart</a>
-        <a href="logout.php">Logout</a>
+        <a href="../auth/logout.php">Logout</a>
     </div>
 </header>
 
@@ -233,7 +232,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <div class="event-container">
         <div class="event-image">
-            <img src="uploads/<?= htmlspecialchars($event['image']) ?>" alt="Event Image">
+            <img src="../admin/uploads/<?= htmlspecialchars($event['image']) ?>" alt="Event Image">
         </div>
 
         <div class="event-details">
