@@ -1,6 +1,7 @@
 <?php
 session_start();
-include 'config.php';
+require_once '../includes/config.php';
+require_once '../includes/helpers.php';
 checkCustomerSession();
 ?>
 
@@ -9,7 +10,7 @@ checkCustomerSession();
 <head>
     <meta charset="UTF-8">
     <title>Home - Event Booking System</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../styles/style.css">
     <style>
         body {
             margin: 0;
@@ -148,12 +149,12 @@ checkCustomerSession();
 <body>
 
 <header>
-    <img src="EventLogo.png" alt="Event Booking Logo" class="header-logo">
+    <img src="../styles/EventLogo.png" alt="Event Booking Logo" class="header-logo">
     <h1>Event Booking System</h1>
     <div>Welcome, <?= htmlspecialchars($_SESSION['user_name']) ?>!</div>
     <div class="top-links">
         <a href="cart.php">Cart</a>
-        <a href="logout.php">Logout</a>
+        <a href="../auth/logout.php">Logout</a>
     </div>
 </header>
 

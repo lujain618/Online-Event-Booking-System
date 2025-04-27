@@ -1,6 +1,6 @@
 <?php
 require_once '../includes/config.php';
-
+require_once '../includes/helpers.php'; 
 // If customer is already logged in, redirect to home
 if (isset($_SESSION['user_id'])) {
     redirect('home.php');
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($user && password_verify($password, $user['password'])) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_name'] = $user['name'];
-        redirect('home.php');
+        redirect('../customer/home.php');
     } else {
         $error = "Invalid email or password.";
     }

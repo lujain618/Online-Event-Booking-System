@@ -1,5 +1,6 @@
 <?php
-include 'config.php';
+require_once '../includes/config.php';
+require_once '../includes/helpers.php';
 checkAdminSession();
 
 // Enable error display for debugging (optional)
@@ -166,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <li><a href="manageEvents.php">Manage Events</a></li>
         <li><a href="addEvent.php">Add Event</a></li>
         <li><a href="viewBookings.php">View Bookings</a></li>
-        <li><a href="logout.php">Logout</a></li>
+        <li><a href="../auth/logout.php">Logout</a></li>
     </ul>
 </div>
 

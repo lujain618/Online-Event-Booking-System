@@ -1,27 +1,36 @@
 <?php
 session_start();
-include('config.php');
+require_once '../includes/config.php';
 
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     header("Location: admin.php");
     exit();
 }
 
-$query = "SELECT bookings.id, users.name AS customer_name, users.email AS customer_email, 
-          bookings.booking_date, events.event_name, events.event_date, 
-          bookings.num_tickets, bookings.total_price
-          FROM bookings 
-          INNER JOIN users ON bookings.user_id = users.id 
-          INNER JOIN events ON bookings.event_id = events.id";
+try {
+    $query = "SELECT bookings.id, users.name AS customer_name, users.email AS customer_email, 
+              bookings.booking_date, events.event_name, events.event_date, 
+              bookings.num_tickets, bookings.total_price
+              FROM bookings 
+              INNER JOIN users ON bookings.user_id = users.id 
+              INNER JOIN events ON bookings.event_id = events.id";
 
-$result = mysqli_query($conn, $query);
+    // Use PDO to prepare and execute
+    $stmt = $conn->prepare($query);
+    $stmt->execute();
+
+    // Fetch all rows at once
+    $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Query failed: " . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../styles/style.css">
     <title>View Bookings</title>
 </head>
 <body>
@@ -36,7 +45,7 @@ $result = mysqli_query($conn, $query);
         <th>Number of Tickets</th>
         <th>Total Price</th>
     </tr>
-    <?php while($row = mysqli_fetch_assoc($result)): ?>
+    <?php foreach ($bookings as $row): ?>
     <tr>
         <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
         <td><?php echo htmlspecialchars($row['customer_email']); ?></td>
@@ -46,7 +55,7 @@ $result = mysqli_query($conn, $query);
         <td><?php echo (int)$row['num_tickets']; ?></td>
         <td>$<?php echo number_format($row['total_price'], 2); ?></td>
     </tr>
-    <?php endwhile; ?>
+    <?php endforeach; ?>
 </table>
 </body>
 </html>

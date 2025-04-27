@@ -1,6 +1,7 @@
 <?php
 session_start();
-include 'config.php';
+require_once '../includes/config.php';
+require_once '../includes/helpers.php'; 
 checkCustomerSession();
 
 // Check if event id is set
@@ -75,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Event Details - Event Booking System</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../styles/style.css">
     <style>
         /* Your same style as before here */
         body {

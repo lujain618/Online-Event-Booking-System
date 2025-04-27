@@ -1,6 +1,7 @@
 <?php
 session_start();
-include 'config.php';
+require_once '../includes/config.php';
+require_once '../includes/helpers.php'; 
 checkCustomerSession();
 
 // Handle Reserve Tickets
@@ -32,7 +33,7 @@ foreach ($cart as $item) {
 <head>
     <meta charset="UTF-8">
     <title>Cart - Event Booking System</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../styles/style.css">
     <style>
         body {
             margin: 0;
@@ -176,7 +177,7 @@ foreach ($cart as $item) {
     <div class="header-right">
         <span>Welcome, <?= htmlspecialchars($_SESSION['user_name']) ?></span>
         <a href="cart.php" class="cart-btn">Cart (<?= $cartCount ?>)</a>
-        <a href="logout.php" class="logout-btn">Logout</a>
+        <a href="../auth/logout.php" class="logout-btn">Logout</a>
     </div>
 </header>
 
